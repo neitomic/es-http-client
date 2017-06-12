@@ -1,5 +1,8 @@
 language: scala
 
+env:
+  - elasticsearch_version=2.4.1
+
 before_install:
   - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${elasticsearch_version}/elasticsearch-${elasticsearch_version}.deb && sudo dpkg -i --force-confnew elasticsearch-${elasticsearch_version}.deb && sudo service elasticsearch restart
 before_script:
