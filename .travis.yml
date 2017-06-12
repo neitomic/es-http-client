@@ -1,0 +1,11 @@
+language: scala
+
+before_install:
+  - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${elasticsearch_version}/elasticsearch-${elasticsearch_version}.deb && sudo dpkg -i --force-confnew elasticsearch-${elasticsearch_version}.deb && sudo service elasticsearch restart
+before_script:
+  - sleep 15
+scala:
+  - 2.11.11
+
+jdk:
+  - oraclejdk8
