@@ -16,6 +16,7 @@ import com.twitter.util.{Future, Promise}
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
+import scala.collection.JavaConversions._
 
 /**
   * Created by user on 6/8/17.
@@ -48,18 +49,20 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   def index(index: String, `type`: String, id: Option[String], source: String): IndexResponse = {
     val resp = client.performRequest(HttpPost.METHOD_NAME,
       s"/$index/${`type`}${id.map(i => s"/$i").getOrElse("")}",
-      Collections.EMPTY_MAP[String, String],
+      Map.empty[String, String],
       new NStringEntity(source, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[IndexResponse])
   }
+
   def update(index: String, `type`: String, id: String, source: String): UpdateResponse = {
     val resp = client.performRequest(HttpPut.METHOD_NAME,
       s"/$index/${`type`}/$id",
-      Collections.EMPTY_MAP[String, String],
+      Map.empty[String, String],
       new NStringEntity(source, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[UpdateResponse])
   }
-  def get(index: String, `type`: String, id: String): GetResponse  = {
+
+  def get(index: String, `type`: String, id: String): GetResponse = {
     val resp = client.performRequest(HttpGet.METHOD_NAME,
       s"/$index/${`type`}/$id")
     objectMapper.readValue(resp.getEntity.getContent, classOf[GetResponse])
@@ -71,5 +74,5 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     objectMapper.readValue(resp.getEntity.getContent, classOf[DeleteResponse])
   }
 
-  def close() : Unit = client.close()
+  def close(): Unit = client.close()
 }
