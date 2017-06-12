@@ -17,6 +17,10 @@ class ESHttpClientUTest extends FunSuite with BeforeAndAfterAllConfigMap  {
       case _ => NoAuth()
     }
     client = new ESHttpClient(configMap.getWithDefault("servers", Seq("localhost:9200")),auth)
+
+    //Delete if already exist
+    client.delete("twitter", "tweet", "1")
+
   }
 
   val doc = Map(
@@ -56,7 +60,7 @@ class ESHttpClientUTest extends FunSuite with BeforeAndAfterAllConfigMap  {
   }
 
   test("Update should return correct response") {
-    val resp = client.update("twitter", "tweet", "1", objectMapper.writeValueAsString(doc))
+    val resp = client.update("twitter", "tweet", "1", objectMapper.writeValueAsString(updateDoc))
     assert(resp._index == "twitter")
     assert(resp._type == "tweet")
     assert(resp._id == "1")

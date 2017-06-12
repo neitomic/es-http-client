@@ -54,11 +54,17 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     objectMapper.readValue(resp.getEntity.getContent, classOf[IndexResponse])
   }
 
-  def update(index: String, `type`: String, id: String, source: String): UpdateResponse = {
+  def update(index: String, `type`: String, id: String, source: String, docAsUpsert: Boolean = false): UpdateResponse = {
+    val updateSource =
+      s"""{
+         | "doc": $source,
+         | "doc_as_upsert": $docAsUpsert
+         |}""".stripMargin
+
     val resp = client.performRequest(HttpPut.METHOD_NAME,
-      s"/$index/${`type`}/$id",
+      s"/$index/${`type`}/$id/_update",
       Map.empty[String, String],
-      new NStringEntity(source, ContentType.APPLICATION_JSON))
+      new NStringEntity(updateSource, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[UpdateResponse])
   }
 
