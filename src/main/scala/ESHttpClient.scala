@@ -61,7 +61,7 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
          | "doc_as_upsert": $docAsUpsert
          |}""".stripMargin
 
-    val resp = client.performRequest(HttpPut.METHOD_NAME,
+    val resp = client.performRequest(HttpPost.METHOD_NAME,
       s"/$index/${`type`}/$id/_update",
       Map.empty[String, String],
       new NStringEntity(updateSource, ContentType.APPLICATION_JSON))
