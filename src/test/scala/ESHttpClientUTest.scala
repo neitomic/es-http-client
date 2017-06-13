@@ -79,7 +79,7 @@ class ESHttpClientUTest extends FunSuite with BeforeAndAfterAllConfigMap  {
     assert(resp._type == "tweet")
     assert(resp._id == "1")
     assert(resp.found)
-    assert(resp._version == 2)
+    assert(resp._version == 3)
   }
 
   override def afterAll(configMap: ConfigMap): Unit = {
