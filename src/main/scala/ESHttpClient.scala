@@ -1,21 +1,14 @@
-import org.apache.http.HttpHost
-import org.elasticsearch.client.{Response, ResponseListener, RestClient, RestClientBuilder}
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.CredentialsProvider
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
-import java.io.InputStream
-import java.nio.file.{Files, Paths}
-import java.security.KeyStore
-import java.util.Collections
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.twitter.util.{Future, Promise}
+import org.apache.commons.logging.LogFactory
+import org.apache.http.HttpHost
+import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.methods._
 import org.apache.http.entity.ContentType
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.nio.entity.NStringEntity
+import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
 import scala.collection.JavaConversions._
 
@@ -23,6 +16,8 @@ import scala.collection.JavaConversions._
   * Created by user on 6/8/17.
   */
 class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
+
+  private val logger = LogFactory.getLog(classOf[ESHttpClient])
 
   private val objectMapper: ObjectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
@@ -44,6 +39,20 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     }
     builder.build()
   }
+
+  private val versionInfo = {
+    val resp = client.performRequest(HttpGet.METHOD_NAME, "/", Map.empty[String, String])
+    objectMapper.readValue(resp.getEntity.getContent, classOf[ClusterInfo])
+  }
+
+  logger.info("===============================================")
+  logger.info("Cluster basic information:")
+  logger.info(s"Cluster name:     ${versionInfo.clusterName}")
+  logger.info(s"ES version:       ${versionInfo.version.number}")
+  logger.info(s"Lucene version:   ${versionInfo.version.luceneVersion}")
+  logger.info("===============================================")
+
+
 
   def getClient: RestClient = client
 

@@ -5,7 +5,7 @@ import org.scalatest._
 /**
   * Created by user on 6/12/17.
   */
-class ESHttpClientUTest extends FunSuite with BeforeAndAfterAllConfigMap  {
+class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAllConfigMap  {
 
   var client: ESHttpClient = null
 
