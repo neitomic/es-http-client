@@ -13,9 +13,10 @@ import java.util.Collections
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.{Future, Promise}
-import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
+import org.apache.http.client.methods._
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
+
 import scala.collection.JavaConversions._
 
 /**
@@ -78,6 +79,57 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     val resp = client.performRequest(HttpDelete.METHOD_NAME,
       s"/$index/${`type`}/$id")
     objectMapper.readValue(resp.getEntity.getContent, classOf[DeleteResponse])
+  }
+
+  /**
+    * Search
+    * @param indies Set of index name
+    * @param types Set of type name
+    * @param query ElasticSearch json query
+    * @return
+    */
+  def search(indies: Set[String], types: Set[String], query: String): SearchResponse = {
+    val resp = client.performRequest(HttpPost.METHOD_NAME,
+    s"""${indies.mkString(",")}/${types.mkString(",")}/_search""",
+      Map.empty[String, String],
+      new NStringEntity(query, ContentType.APPLICATION_JSON))
+    objectMapper.readValue(resp.getEntity.getContent, classOf[SearchResponse])
+  }
+
+  def search(index: String, `type`: String, query: String): SearchResponse =
+    search(Set(index), Set(`type`), query)
+
+  def search(index: String, types: Set[String], query: String): SearchResponse =
+    search(Set(index), types, query)
+
+  def createIndex(indexName: String, settingsAndMappings: String): AckResponse = {
+    val resp = client.performRequest(HttpPut.METHOD_NAME, s"/$indexName",
+      Map.empty[String, String],
+      new NStringEntity(settingsAndMappings, ContentType.APPLICATION_JSON)
+    )
+    objectMapper.readValue(resp.getEntity.getContent, classOf[AckResponse])
+  }
+
+  /**
+    * Delete one or multiple index
+    * @param indies single index, multiple index with comma separated,
+    *               all indies with _all, wildcard expression
+    * @return
+    */
+  def deleteIndies(indies: String): AckResponse = {
+    val resp = client.performRequest(HttpDelete.METHOD_NAME, s"/$indies")
+    objectMapper.readValue(resp.getEntity.getContent, classOf[AckResponse])
+  }
+
+  def indexExist(index: String) : Boolean = {
+    val resp = client.performRequest(HttpHead.METHOD_NAME, s"$index")
+    resp.getStatusLine.getStatusCode match {
+      case 200 => true
+      case 404 => false
+      case _ =>
+        //TODO: Should we handle others code?
+        throw new Exception("Invalid http response code")
+    }
   }
 
   def close(): Unit = client.close()

@@ -4,6 +4,7 @@ import java.util.Calendar
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.csv.{CsvMapper, CsvSchema}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.github.wnameless.json.unflattener.JsonUnflattener
 
 import scala.collection.mutable
 
@@ -17,9 +18,9 @@ object EsDataPusher {
 
   def main(args: Array[String]): Unit = {
 
-    val client = new ESHttpClient(Seq("localhost:9202"), NoAuth())
+    val client = new ESHttpClient(Seq("http://169.56.144.40:9200"), NoAuth())
 
-    val file = "D:/TienNT4/working/CirceBoard/data/worldbank_vn/API_VNM_DS2_en_csv_v2.csv"
+    val file = "C:/Users/51103/Working/projects/CirceBoard/data/worldbank_vn/API_VNM_DS2_en_csv_v2.csv"
     val reader = new BufferedReader(new FileReader(file))
 
     //First line is header
@@ -50,14 +51,13 @@ object EsDataPusher {
       })
       line = reader.readLine()
     }
-
+    reader.close()
 
     val calendar = Calendar.getInstance()
     calendar.set(calendar.get(Calendar.YEAR), 0, 1,0,0,0)
     calendar.set(Calendar.MILLISECOND, 0)
     val seq = data.map(e =>
       {
-
         val newVal = e._2.toSeq.map(field => {
           val firstIndexOfDot = field._1.indexOf(".")
 
@@ -70,12 +70,30 @@ object EsDataPusher {
         .mapValues(_.map(_._2).foldLeft(Map.empty[String, Double])((b,e) => b ++ e))
 
         calendar.set(Calendar.YEAR, e._1.toInt)
-        grouped.map(e => e._1 -> (e._2 ++ Map("time" -> calendar.getTimeInMillis)))
+        val data = grouped.map(e => e._1 -> (e._2 ++ Map("time" -> calendar.getTimeInMillis)))
+        e._1 -> data
       })
 
     val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
-    println(objectMapper.writeValueAsString(seq))
-    reader.close()
+
+    val index = "worldbank_vn"
+    if(client.indexExist(index)) {
+      println("Index existed, delete it")
+      println(s"Delete index: ${client.deleteIndies(index).acknowledged}")
+      Thread.sleep(10000l)
+    }
+    client.createIndex(index, "{}")
+
+    seq.foreach(year => {
+      val id = year._1
+      year._2.foreach(typ => {
+        val typeName = typ._1
+        val data = typ._2
+        val dataStr = JsonUnflattener.unflatten(objectMapper.writeValueAsString(data))
+        val resp = client.index(index, typeName, Some(id), dataStr)
+        println(s"Index: ${resp._index} - ${resp._type} - ${resp._id} - ${resp.created} - ${resp._version}")
+      })
+    })
     client.getClient.close()
   }
 
