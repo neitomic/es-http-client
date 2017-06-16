@@ -1,3 +1,5 @@
+package org.elasticsearch.client.http.entities
+
 /**
   * Created by user on 6/8/17.
   */

@@ -1,9 +1,12 @@
+package org.elasticsearch.client.http
+
 /**
   * Created by user on 6/15/17.
   */
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth}
 import org.elasticsearch.index.query.QueryBuilders
 import org.scalatest.{BeforeAndAfterAllConfigMap, ConfigMap, FunSuite}
 
@@ -12,6 +15,8 @@ import scala.io.Source
 class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
 
   var client: ESHttpClient = null
+  private val index = "test"
+  private val `type` = "doc"
 
   val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
@@ -26,12 +31,10 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
   @throws[Exception]
   def testDocWithAllTypes(): Unit = {
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
-    val idxSetting = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
-    val index = "test"
-    val `type` = "doc"
     val id = "1"
+    val idxSetting = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
     assert(client.createIndex(index, idxSetting).acknowledged)
-    assert(client.index(index, `type`, Some(id), docBody)._id == "1")
+    assert(client.index(index, `type`, Some(id), docBody).getId == "1")
     var resp = client.search(index, `type`, QueryBuilders.queryStringQuery("foo").toString)
     assert(resp.hits.total == 1L)
     resp = client.search("test" , "doc", QueryBuilders.queryStringQuery("Bar").toString)
@@ -64,6 +67,12 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
     // suggest doesn't match
     // geo_point doesn't match
     // geo_shape doesn't match
+    assert(client.deleteIndies(index).acknowledged)
+  }
+
+  override def afterAll(configMap: ConfigMap): Unit = {
+    super.afterAll(configMap)
+    client.close()
   }
 
 }

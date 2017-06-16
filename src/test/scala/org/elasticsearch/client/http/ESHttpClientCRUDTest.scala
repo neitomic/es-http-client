@@ -1,22 +1,25 @@
+package org.elasticsearch.client.http
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth}
 import org.scalatest._
 
 /**
   * Created by user on 6/12/17.
   */
-class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAllConfigMap  {
+class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAll {
 
   var client: ESHttpClient = null
 
   val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
-  override def beforeAll(configMap: ConfigMap): Unit = {
-    val auth = (configMap.getOptional[String]("user"), configMap.getOptional[String]("pass")) match {
+  override def beforeAll(): Unit = {
+    val auth = (Option(System.getProperty("auth.user")), Option(System.getProperty("auth.pass"))) match {
       case (Some(user), Some(pass)) => BasicAuthInfo(user, pass)
       case _ => NoAuth()
     }
-    client = new ESHttpClient(configMap.getWithDefault("servers", Seq("localhost:9200")),auth)
+    client = new ESHttpClient(System.getProperty("servers", "localhost:9200").split(","), auth)
   }
 
   val doc = Map(
@@ -30,7 +33,7 @@ class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAllConfigMap  {
     "message" -> "trying out ElasticSearch"
   )
 
-  val updatedDoc =  Map(
+  val updatedDoc = Map(
     "user" -> "kimchy",
     "post_date" -> "2009-11-15T14:12:14",
     "message" -> "trying out ElasticSearch"
@@ -38,51 +41,51 @@ class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAllConfigMap  {
 
   test("Index with id should return correct response") {
     val resp = client.index("twitter", "tweet", Some("1"), objectMapper.writeValueAsString(doc))
-    assert(resp._index == "twitter")
-    assert(resp._type == "tweet")
-    assert(resp._id == "1")
+    assert(resp.getIndex == "twitter")
+    assert(resp.getType == "tweet")
+    assert(resp.getId == "1")
     assert(resp.created)
-    assert(resp._version == 1)
+    assert(resp.getVersion == 1)
   }
 
   test("Get on first doc should return correct source") {
     val resp = client.get("twitter", "tweet", "1")
-    assert(resp._index == "twitter")
-    assert(resp._type == "tweet")
-    assert(resp._id == "1")
+    assert(resp.getIndex == "twitter")
+    assert(resp.getType == "tweet")
+    assert(resp.getId == "1")
     assert(resp.found)
-    assert(resp._version == 1)
-    assert(resp._source == doc)
+    assert(resp.getVersion == 1)
+    assert(resp.getSource == doc)
   }
 
   test("Update should return correct response") {
     val resp = client.update("twitter", "tweet", "1", objectMapper.writeValueAsString(updateDoc))
-    assert(resp._index == "twitter")
-    assert(resp._type == "tweet")
-    assert(resp._id == "1")
-    assert(resp._version == 2)
+    assert(resp.getIndex == "twitter")
+    assert(resp.getType == "tweet")
+    assert(resp.getId == "1")
+    assert(resp.getVersion == 2)
   }
 
   test("Get on updated doc should return correct source") {
     val resp = client.get("twitter", "tweet", "1")
-    assert(resp._index == "twitter")
-    assert(resp._type == "tweet")
-    assert(resp._id == "1")
+    assert(resp.getIndex == "twitter")
+    assert(resp.getType == "tweet")
+    assert(resp.getId == "1")
     assert(resp.found)
-    assert(resp._version == 2)
-    assert(resp._source == updatedDoc)
+    assert(resp.getVersion == 2)
+    assert(resp.getSource == updatedDoc)
   }
 
   test("Delete should return correct response") {
     val resp = client.delete("twitter", "tweet", "1")
-    assert(resp._index == "twitter")
-    assert(resp._type == "tweet")
-    assert(resp._id == "1")
+    assert(resp.getIndex == "twitter")
+    assert(resp.getType == "tweet")
+    assert(resp.getId == "1")
     assert(resp.found)
-    assert(resp._version == 3)
+    assert(resp.getVersion == 3)
   }
 
-  override def afterAll(configMap: ConfigMap): Unit = {
+  override def afterAll(): Unit = {
     client.close()
   }
 

@@ -1,3 +1,5 @@
+package org.elasticsearch.client.http
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.commons.logging.LogFactory
@@ -8,6 +10,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.nio.entity.NStringEntity
+import org.elasticsearch.client.http.entities._
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
 import scala.collection.JavaConversions._
