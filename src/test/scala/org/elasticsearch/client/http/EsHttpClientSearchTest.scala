@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth}
 import org.elasticsearch.index.query.QueryBuilders
-import org.scalatest.{BeforeAndAfterAllConfigMap, ConfigMap, FunSuite}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterAllConfigMap, ConfigMap, FunSuite}
 
 import scala.io.Source
 
-class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
+class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
 
   var client: ESHttpClient = null
   private val index = "test"
@@ -20,16 +20,15 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
 
   val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
-  override def beforeAll(configMap: ConfigMap): Unit = {
-    val auth = (configMap.getOptional[String]("user"), configMap.getOptional[String]("pass")) match {
+  override def beforeAll(): Unit = {
+    val auth = (Option(System.getProperty("auth.user")), Option(System.getProperty("auth.pass"))) match {
       case (Some(user), Some(pass)) => BasicAuthInfo(user, pass)
       case _ => NoAuth()
     }
-    client = new ESHttpClient(configMap.getWithDefault("servers", Seq("localhost:9200")),auth)
+    client = new ESHttpClient(System.getProperty("servers", "localhost:9200").split(","), auth)
   }
 
-  @throws[Exception]
-  def testDocWithAllTypes(): Unit = {
+  test("test doc with all types should success") {
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
     val id = "1"
     val idxSetting = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
@@ -70,8 +69,8 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAllConfigMap {
     assert(client.deleteIndies(index).acknowledged)
   }
 
-  override def afterAll(configMap: ConfigMap): Unit = {
-    super.afterAll(configMap)
+  override def afterAll(): Unit = {
+    super.afterAll()
     client.close()
   }
 
