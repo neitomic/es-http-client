@@ -43,16 +43,16 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     builder.build()
   }
 
-  private val versionInfo = {
+  val clusterInfo: ClusterInfo = {
     val resp = client.performRequest(HttpGet.METHOD_NAME, "/", Map.empty[String, String])
     objectMapper.readValue(resp.getEntity.getContent, classOf[ClusterInfo])
   }
 
   logger.info("===============================================")
   logger.info("Cluster basic information:")
-  logger.info(s"Cluster name:     ${versionInfo.clusterName}")
-  logger.info(s"ES version:       ${versionInfo.version.number}")
-  logger.info(s"Lucene version:   ${versionInfo.version.luceneVersion}")
+  logger.info(s"Cluster name:     ${clusterInfo.clusterName}")
+  logger.info(s"ES version:       ${clusterInfo.version.number}")
+  logger.info(s"Lucene version:   ${clusterInfo.version.luceneVersion}")
   logger.info("===============================================")
 
 

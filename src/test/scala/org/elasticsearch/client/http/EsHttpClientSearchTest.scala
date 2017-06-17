@@ -31,7 +31,12 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
   test("test doc with all types should success") {
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
     val id = "1"
-    val idxSetting = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
+    val idxSetting =
+      if(client.clusterInfo.version.number.split("\\.")(0).toInt < 5) {
+        Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index-lt5.json")).mkString
+      }else{
+        Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
+      }
     assert(client.createIndex(index, idxSetting).acknowledged)
     assert(client.index(index, `type`, Some(id), docBody).getId == "1")
     var resp = client.search(index, `type`, QueryBuilders.queryStringQuery("foo").toString)
