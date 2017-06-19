@@ -33,16 +33,21 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
     val id = "1"
     val idxSetting =
-      if(client.clusterInfo.version.number.split("\\.")(0).toInt < 5) {
+      if (client.clusterInfo.version.number.split("\\.")(0).toInt < 5) {
         Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index-lt5.json")).mkString
-      }else{
+      } else {
         Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
       }
     assert(client.createIndex(index, idxSetting).acknowledged)
     assert(client.index(index, `type`, Some(id), docBody).getId == "1")
+
+    client.refresh(Set(index))
+    //Wait 2 secs for index refresh
+    Thread.sleep(2000)
+
     var resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("foo")).toString)
     assert(resp.hits.total == 1L)
-    resp = client.search("test" , "doc", SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("Bar")).toString)
+    resp = client.search("test", "doc", SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("Bar")).toString)
     assert(resp.hits.total == 1L)
     resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("Baz")).toString)
     assert(resp.hits.total == 1L)
@@ -61,10 +66,6 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
     resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("42")).toString)
     assert(resp.hits.total == 1L)
     resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("1.7")).toString)
-    assert(resp.hits.total == 1L)
-    resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("1.5")).toString)
-    assert(resp.hits.total == 1L)
-    resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("12.23")).toString)
     assert(resp.hits.total == 1L)
     resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("127.0.0.1")).toString)
     assert(resp.hits.total == 1L)

@@ -134,13 +134,21 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   }
 
   def indexExist(index: String) : Boolean = {
-    val resp = client.performRequest(HttpHead.METHOD_NAME, s"$index")
+    val resp = client.performRequest(HttpHead.METHOD_NAME, s"/$index")
     resp.getStatusLine.getStatusCode match {
       case 200 => true
       case 404 => false
       case _ =>
         //TODO: Should we handle others code?
         throw new Exception("Invalid http response code")
+    }
+  }
+
+  def refresh(indies: Set[String]): Unit = {
+    val resp = client.performRequest(HttpPost.METHOD_NAME, s"/${indies.mkString(",")}/_refresh")
+    resp.getStatusLine.getStatusCode match {
+      case 200 => true
+      case code => throw new Exception(s"Refresh topic return code $code")
     }
   }
 
