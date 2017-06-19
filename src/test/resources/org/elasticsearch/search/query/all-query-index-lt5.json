@@ -9,7 +9,7 @@
     "doc": {
       "properties": {
         "f1": {"type": "string"},
-        "f2": {"type": "keyword"},
+        "f2": {"type": "string", "index": "not_analyzed"},
         "f3": {"type": "string"},
         "f4": {
           "type": "string",
@@ -18,7 +18,7 @@
         "f_multi": {
           "type": "string",
           "fields": {
-            "raw": {"type": "keyword"},
+            "raw": {"type": "string", "index": "not_analyzed"},
             "f_token_count": {"type": "token_count", "analyzer": "standard"}
           }
         },
@@ -26,7 +26,7 @@
           "type": "object",
           "properties": {
             "sub1": {"type": "string"},
-            "sub2": {"type": "keyword"},
+            "sub2": {"type": "string", "index": "not_analyzed"},
             "sub3": {"type": "integer"}
           }
         },
@@ -34,7 +34,7 @@
           "type": "nested",
           "properties": {
             "nest1": {"type": "string"},
-            "nest2": {"type": "keyword"},
+            "nest2": {"type": "string", "index": "not_analyzed"},
             "nest3": {"type": "integer"}
           }
         },
