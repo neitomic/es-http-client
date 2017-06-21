@@ -2,7 +2,7 @@ package org.elasticsearch.client.http.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
-import com.fasterxml.jackson.databind.annotation.JsonNaming
+import com.fasterxml.jackson.databind.annotation.{JsonDeserialize, JsonNaming}
 
 trait DocRequest {
 
@@ -34,7 +34,7 @@ case class DocDeleteRequest(__index: Option[String], __type: Option[String], __i
       val tmp = Seq(
         __index.map(v => s""""_index" : "$v""""),
         __type.map(v => s""""_type" : "$v""""),
-        s""""_index" : "$__id""""
+        s""""_id" : "${__id}""""
       ).mkString(", ")
       s"""{ "delete" : { $tmp } }"""
     }
@@ -55,7 +55,7 @@ case class DocUpdateRequest(__index: Option[String], __type: Option[String], __i
       val tmp = Seq(
         __index.map(v => s""""_index" : "$v""""),
         __type.map(v => s""""_type" : "$v""""),
-        s""""_index" : "$__id""""
+        s""""_index" : "${__id}""""
       ).mkString(", ")
       s"""{ "update" : { $tmp } }"""
     }
@@ -82,9 +82,12 @@ case class SearchRequest(searchQuery: String, __index: Option[String] = None, __
 @JsonNaming(classOf[SnakeCaseStrategy])
 case class GetRequest(__index: Option[String], __type: Option[String], __id: String)
 
+
+trait DocResponse
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[SnakeCaseStrategy])
-case class IndexResponse(__index: String, __type: String, __id: String, __version: Long, created: Boolean) {
+case class IndexResponse(__index: String, __type: String, __id: String, __version: Long, created: Boolean) extends DocResponse {
   def getIndex: String = __index
 
   def getType: String = __type
@@ -98,7 +101,7 @@ case class IndexResponse(__index: String, __type: String, __id: String, __versio
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[SnakeCaseStrategy])
-case class UpdateResponse(__index: String, __type: String, __id: String, __version: Long) {
+case class UpdateResponse(__index: String, __type: String, __id: String, __version: Long) extends DocResponse {
   def getIndex: String = __index
 
   def getType: String = __type
@@ -108,8 +111,24 @@ case class UpdateResponse(__index: String, __type: String, __id: String, __versi
   def getVersion: Long = __version
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(classOf[SnakeCaseStrategy])
+case class DeleteResponse(__index: String, __type: String, __id: String, __version: Long, found: Boolean) extends DocResponse {
+  def getIndex: String = __index
+
+  def getType: String = __type
+
+  def getId: String = __id
+
+  def getVersion: Long = __version
+
+  def isFound: Boolean = found
+}
+
 case class BulkResponse(took: Long, items: Seq[BulkItemResponse])
-case class BulkItemResponse()
+
+@JsonDeserialize(using = classOf[BulkItemResponseDeserializer])
+case class BulkItemResponse(actionType: String, response: DocResponse)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[SnakeCaseStrategy])
@@ -125,19 +144,6 @@ case class GetResponse(__index: String, __type: String, __id: String, __version:
   def getSource: Map[String, Any] = __source
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[SnakeCaseStrategy])
-case class DeleteResponse(__index: String, __type: String, __id: String, __version: Long, found: Boolean) {
-  def getIndex: String = __index
-
-  def getType: String = __type
-
-  def getId: String = __id
-
-  def getVersion: Long = __version
-
-  def isFound: Boolean = found
-}
 
 case class MultiSearchResponse(responses: Seq[SearchResponse])
 
