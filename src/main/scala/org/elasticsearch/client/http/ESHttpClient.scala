@@ -3,13 +3,13 @@ package org.elasticsearch.client.http
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.commons.logging.LogFactory
-import org.apache.http.HttpHost
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.methods._
 import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
-import org.apache.http.nio.entity.NStringEntity
+import org.apache.http.nio.entity.{NByteArrayEntity, NStringEntity}
+import org.apache.http.{Consts, HttpHost}
 import org.elasticsearch.client.http.entities._
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
@@ -21,6 +21,8 @@ import scala.collection.JavaConversions._
 class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
 
   private val logger = LogFactory.getLog(classOf[ESHttpClient])
+
+  private final val APPLICATION_X_NDJSON = ContentType.create("application/x-ndjson", Consts.UTF_8)
 
   private val objectMapper: ObjectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
@@ -54,8 +56,6 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   logger.info(s"ES version:       ${versionInfo.version.number}")
   logger.info(s"Lucene version:   ${versionInfo.version.luceneVersion}")
   logger.info("===============================================")
-
-
 
   def getClient: RestClient = client
 
@@ -93,19 +93,33 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     objectMapper.readValue(resp.getEntity.getContent, classOf[DeleteResponse])
   }
 
+  def bulk(index: Option[String], `type`: Option[String], requests: Seq[DocRequest]): BulkResponse = {
+
+  }
+
   /**
     * Search
+    *
     * @param indies Set of index name
-    * @param types Set of type name
-    * @param query ElasticSearch json query
+    * @param types  Set of type name
+    * @param query  ElasticSearch json query
     * @return
     */
   def search(indies: Set[String], types: Set[String], query: String): SearchResponse = {
     val resp = client.performRequest(HttpPost.METHOD_NAME,
-    s"""${indies.mkString(",")}/${types.mkString(",")}/_search""",
+      (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (indies.isEmpty) "" else indies.mkString(",") + "/") + "_search",
       Map.empty[String, String],
       new NStringEntity(query, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[SearchResponse])
+  }
+
+  def msearch(indies: Set[String], types: Set[String], requests: Seq[SearchRequest]): MultiSearchResponse = {
+    val resp = client.performRequest(HttpPost.METHOD_NAME,
+      (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (indies.isEmpty) "" else indies.mkString(",") + "/") + "_msearch",
+      Map.empty[String, String],
+      new NByteArrayEntity(requests.map(_.toMultiSearchNDJson).mkString("\n").getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
+    )
+    objectMapper.readValue(resp.getEntity.getContent, classOf[MultiSearchResponse])
   }
 
   def search(index: String, `type`: String, query: String): SearchResponse =
@@ -124,6 +138,7 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
 
   /**
     * Delete one or multiple index
+    *
     * @param indies single index, multiple index with comma separated,
     *               all indies with _all, wildcard expression
     * @return
@@ -133,7 +148,7 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     objectMapper.readValue(resp.getEntity.getContent, classOf[AckResponse])
   }
 
-  def indexExist(index: String) : Boolean = {
+  def indexExist(index: String): Boolean = {
     val resp = client.performRequest(HttpHead.METHOD_NAME, s"$index")
     resp.getStatusLine.getStatusCode match {
       case 200 => true
