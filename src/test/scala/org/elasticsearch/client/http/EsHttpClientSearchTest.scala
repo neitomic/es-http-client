@@ -42,8 +42,9 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
     assert(client.index(index, `type`, Some(id), docBody).getId == "1")
 
     client.refresh(Set(index))
-    //Wait 2 secs for index refresh
-    Thread.sleep(2000)
+    //Wait 5 secs for index refresh
+    println("Sleep 5 seconds for index refresh...")
+    Thread.sleep(5000)
 
     var resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("foo")).toString)
     assert(resp.hits.total == 1L)

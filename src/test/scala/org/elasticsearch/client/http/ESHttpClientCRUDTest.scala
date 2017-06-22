@@ -85,6 +85,10 @@ class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAll {
     assert(resp.getVersion == 3)
   }
 
+  test("Bulk api should return correct response") {
+
+  }
+
   override def afterAll(): Unit = {
     client.close()
   }
