@@ -20,6 +20,7 @@ class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAll {
       case _ => NoAuth()
     }
     client = new ESHttpClient(System.getProperty("servers", "localhost:9200").split(","), auth)
+    assert(client.createIndex("twitter", "{}").acknowledged)
   }
 
   val doc = Map(
@@ -86,6 +87,7 @@ class ESHttpClientCRUDTest extends FunSuite with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
+    client.deleteIndies("twitter")
     client.close()
   }
 
