@@ -6,7 +6,7 @@ package org.elasticsearch.client.http
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth}
+import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth, SearchRequest}
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterAllConfigMap, ConfigMap, FunSuite}
@@ -27,9 +27,7 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
       case _ => NoAuth()
     }
     client = new ESHttpClient(System.getProperty("servers", "localhost:9200").split(","), auth)
-  }
 
-  test("test doc with all types should success") {
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
     val id = "1"
     val idxSetting =
@@ -40,11 +38,11 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
       }
     assert(client.createIndex(index, idxSetting).acknowledged)
     assert(client.index(index, `type`, Some(id), docBody).getId == "1")
-
     client.refresh(Set(index))
-    //Wait 5 secs for index refresh
-    println("Sleep 5 seconds for index refresh...")
-    Thread.sleep(5000)
+    Thread.sleep(2000)
+  }
+
+  test("test doc with all types should success") {
 
     var resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("foo")).toString)
     assert(resp.hits.total == 1L)
@@ -70,15 +68,26 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
     assert(resp.hits.total == 1L)
     resp = client.search(index, `type`, SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("127.0.0.1")).toString)
     assert(resp.hits.total == 1L)
-    // binary doesn't match
-    // suggest doesn't match
-    // geo_point doesn't match
-    // geo_shape doesn't match
-    assert(client.deleteIndies(index).acknowledged)
+
+  }
+
+  test("test msearch") {
+       val request = Seq(
+      SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("foo")).toString),
+      SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("Bar")).toString),
+      SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("1476383971")).toString)
+    )
+    val resp = client.msearch(Set(index), Set.empty, request)
+
+    assert(resp.responses.length == request.length)
+    for (elem <- resp.responses) {
+      assert(elem.hits.total == 1L)
+    }
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
+    assert(client.deleteIndies(index).acknowledged)
     client.close()
   }
 

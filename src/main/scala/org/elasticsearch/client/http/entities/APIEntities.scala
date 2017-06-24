@@ -18,10 +18,10 @@ case class DocIndexRequest(__index: Option[String], __type: Option[String], __id
   override def toBulkJson(): String = {
     val meta = {
       val tmp = Seq(
-        __index.map(v => s""""_index" : "$v""""),
-        __type.map(v => s""""_type" : "$v""""),
-        __id.map(v => s""""_id" : "$v"""")
-      ).mkString(", ")
+        __index.map(v => s""""_index" : "$v"""").getOrElse(""),
+        __type.map(v => s""""_type" : "$v"""").getOrElse(""),
+        __id.map(v => s""""_id" : "$v"""").getOrElse("")
+      ).filter(_.nonEmpty).mkString(", ")
       s"""{ "index" : { $tmp } }"""
     }
     meta + "\n" + source.replaceAll("[\r\n]", "")
@@ -32,10 +32,10 @@ case class DocDeleteRequest(__index: Option[String], __type: Option[String], __i
   override def toBulkJson(): String = {
     val meta = {
       val tmp = Seq(
-        __index.map(v => s""""_index" : "$v""""),
-        __type.map(v => s""""_type" : "$v""""),
-        s""""_id" : "${__id}""""
-      ).mkString(", ")
+        __index.map(v => s""""_index" : "$v"""").getOrElse(""),
+        __type.map(v => s""""_type" : "$v"""").getOrElse(""),
+        s""""_index" : "${__id}""""
+      ).filter(_.nonEmpty).mkString(", ")
       s"""{ "delete" : { $tmp } }"""
     }
     meta
@@ -53,10 +53,10 @@ case class DocUpdateRequest(__index: Option[String], __type: Option[String], __i
   override def toBulkJson(): String = {
     val meta = {
       val tmp = Seq(
-        __index.map(v => s""""_index" : "$v""""),
-        __type.map(v => s""""_type" : "$v""""),
+        __index.map(v => s""""_index" : "$v"""").getOrElse(""),
+        __type.map(v => s""""_type" : "$v"""").getOrElse(""),
         s""""_index" : "${__id}""""
-      ).mkString(", ")
+      ).filter(_.nonEmpty).mkString(", ")
       s"""{ "update" : { $tmp } }"""
     }
     meta + "\n" + s"""{ "doc": ${source.replaceAll("[\r\n]", "")}}"""
@@ -68,10 +68,10 @@ case class SearchRequest(searchQuery: String, __index: Option[String] = None, __
   def toMultiSearchNDJson: String = {
     val header = {
       val tmp = Seq(
-        __index.map(v => s""""_index" : "$v""""),
-        __type.map(v => s""""_type" : "$v""""),
-        searchType.map(v => s""""search_type" : "$v"""")
-      ).mkString(", ")
+        __index.map(v => s""""_index" : "$v"""").getOrElse(""),
+        __type.map(v => s""""_type" : "$v"""").getOrElse(""),
+        searchType.map(v => s""""search_type" : "$v"""").getOrElse("")
+      ).filter(_.nonEmpty).mkString(", ")
       s"""{ $tmp }"""
     }
     header + "\n" + searchQuery.replaceAll("[\r\n]", "")

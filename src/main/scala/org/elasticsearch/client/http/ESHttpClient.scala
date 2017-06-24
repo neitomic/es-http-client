@@ -111,18 +111,20 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     * @return
     */
   def search(indies: Set[String], types: Set[String], query: String): SearchResponse = {
+    val endpoint = (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (types.isEmpty) "" else types.mkString(",") + "/")  + "_search"
     val resp = client.performRequest(HttpPost.METHOD_NAME,
-      (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (indies.isEmpty) "" else indies.mkString(",") + "/") + "_search",
+      endpoint ,
       Map.empty[String, String],
       new NStringEntity(query, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[SearchResponse])
   }
 
   def msearch(indies: Set[String], types: Set[String], requests: Seq[SearchRequest]): MultiSearchResponse = {
+    val body = requests.map(_.toMultiSearchNDJson).mkString("\n") + "\n"
     val resp = client.performRequest(HttpPost.METHOD_NAME,
-      (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (indies.isEmpty) "" else indies.mkString(",") + "/") + "_msearch",
+      (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (types.isEmpty) "" else types.mkString(",") + "/") + "_msearch",
       Map.empty[String, String],
-      new NByteArrayEntity(requests.map(_.toMultiSearchNDJson).mkString("\n").getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
+      new NByteArrayEntity(body.getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
     )
     objectMapper.readValue(resp.getEntity.getContent, classOf[MultiSearchResponse])
   }
