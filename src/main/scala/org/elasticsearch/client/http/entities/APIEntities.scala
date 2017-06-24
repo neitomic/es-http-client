@@ -34,7 +34,7 @@ case class DocDeleteRequest(__index: Option[String], __type: Option[String], __i
       val tmp = Seq(
         __index.map(v => s""""_index" : "$v"""").getOrElse(""),
         __type.map(v => s""""_type" : "$v"""").getOrElse(""),
-        s""""_index" : "${__id}""""
+        s""""_id" : "${__id}""""
       ).filter(_.nonEmpty).mkString(", ")
       s"""{ "delete" : { $tmp } }"""
     }
@@ -55,7 +55,7 @@ case class DocUpdateRequest(__index: Option[String], __type: Option[String], __i
       val tmp = Seq(
         __index.map(v => s""""_index" : "$v"""").getOrElse(""),
         __type.map(v => s""""_type" : "$v"""").getOrElse(""),
-        s""""_index" : "${__id}""""
+        s""""_id" : "${__id}""""
       ).filter(_.nonEmpty).mkString(", ")
       s"""{ "update" : { $tmp } }"""
     }
@@ -125,6 +125,8 @@ case class DeleteResponse(__index: String, __type: String, __id: String, __versi
   def isFound: Boolean = found
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(classOf[SnakeCaseStrategy])
 case class BulkResponse(took: Long, items: Seq[BulkItemResponse])
 
 @JsonDeserialize(using = classOf[BulkItemResponseDeserializer])

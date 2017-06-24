@@ -96,7 +96,7 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   def bulk(index: Option[String], `type`: Option[String], requests: Seq[DocRequest]): BulkResponse = {
     val bodyString = requests.map(_.toBulkJson()).mkString("\n") + "\n"
     val resp = client.performRequest(HttpPost.METHOD_NAME,
-      index.map(_ + "/").getOrElse("") + `type`.map(_ + "/").getOrElse("") + "_bulk",
+      "/" + index.map(_ + "/").getOrElse("") + `type`.map(_ + "/").getOrElse("") + "_bulk",
       Map.empty[String, String],
       new NByteArrayEntity(bodyString.getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
     )
