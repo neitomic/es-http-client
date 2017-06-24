@@ -94,10 +94,11 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   }
 
   def bulk(index: Option[String], `type`: Option[String], requests: Seq[DocRequest]): BulkResponse = {
+    val bodyString = requests.map(_.toBulkJson()).mkString("\n") + "\n"
     val resp = client.performRequest(HttpPost.METHOD_NAME,
       index.map(_ + "/").getOrElse("") + `type`.map(_ + "/").getOrElse("") + "_bulk",
       Map.empty[String, String],
-      new NByteArrayEntity(requests.map(_.toBulkJson()).mkString("\n").getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
+      new NByteArrayEntity(bodyString.getBytes(Consts.UTF_8), APPLICATION_X_NDJSON)
     )
     objectMapper.readValue(resp.getEntity.getContent, classOf[BulkResponse])
   }
@@ -111,9 +112,9 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
     * @return
     */
   def search(indies: Set[String], types: Set[String], query: String): SearchResponse = {
-    val endpoint = (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (types.isEmpty) "" else types.mkString(",") + "/")  + "_search"
+    val endpoint = (if (indies.isEmpty) "" else indies.mkString(",") + "/") + (if (types.isEmpty) "" else types.mkString(",") + "/") + "_search"
     val resp = client.performRequest(HttpPost.METHOD_NAME,
-      endpoint ,
+      endpoint,
       Map.empty[String, String],
       new NStringEntity(query, ContentType.APPLICATION_JSON))
     objectMapper.readValue(resp.getEntity.getContent, classOf[SearchResponse])
