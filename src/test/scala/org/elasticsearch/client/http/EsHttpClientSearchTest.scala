@@ -30,12 +30,8 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
 
     val docBody = Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-example-document.json")).mkString
     val id = "1"
-    val idxSetting =
-      if (client.clusterInfo.version.number.split("\\.")(0).toInt < 5) {
-        Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index-lt5.json")).mkString
-      } else {
-        Source.fromURL(getClass.getResource("/org/elasticsearch/search/query/all-query-index.json")).mkString
-      }
+    val idxSetting = Source.fromURL(getClass.getResource(s"/org/elasticsearch/search/query/all-query-index-v${client.clusterInfo.version.number.split("\\.")(0)}.json")).mkString
+
     assert(client.createIndex(index, idxSetting).acknowledged)
     assert(client.index(index, `type`, Some(id), docBody).getId == "1")
     client.refresh(Set(index))
@@ -72,7 +68,7 @@ class EsHttpClientSearchTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("test msearch") {
-       val request = Seq(
+    val request = Seq(
       SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("foo")).toString),
       SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("Bar")).toString),
       SearchRequest(SearchSourceBuilder.searchSource().query(QueryBuilders.queryStringQuery("1476383971")).toString)
