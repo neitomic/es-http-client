@@ -1,12 +1,18 @@
+dist: trusty
+
 language: scala
 
 env:
-  - elasticsearch_version=2.4.1
+  - es_url=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.1/elasticsearch-2.4.1.deb
+  - es_url=https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.3.0.deb
+  - es_url=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.0.deb
 
 before_install:
-  - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${elasticsearch_version}/elasticsearch-${elasticsearch_version}.deb && sudo dpkg -i --force-confnew elasticsearch-${elasticsearch_version}.deb && sudo service elasticsearch restart
+  - wget ${es_url} -O es.deb && sudo dpkg -i --force-confnew es.deb && sudo service elasticsearch restart
+
 before_script:
   - sleep 15
+
 scala:
   - 2.11.11
 
