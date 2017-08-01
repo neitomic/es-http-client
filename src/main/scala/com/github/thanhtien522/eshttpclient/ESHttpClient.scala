@@ -38,14 +38,14 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
         })
 
-      case BasicAuthWithEncryptAuthInfo(user, pass, keyStorePath, keyStorePass) =>
-      //TODO: Implement encrypted communication
+      case BasicAuthWithEncryptAuthInfo(_, _, _, _) =>
+        throw new IllegalArgumentException("BasicAuthWithEncryptAuthInfo currently does not supported.")
       case _ => //Do nothing
     }
     builder.build()
   }
 
-  val clusterInfo = {
+  val clusterInfo: ClusterInfo = {
     val resp = client.performRequest(HttpGet.METHOD_NAME, "/", Map.empty[String, String])
     objectMapper.readValue(resp.getEntity.getContent, classOf[ClusterInfo])
   }
@@ -170,7 +170,7 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
   def refresh(indies: Set[String]): Unit = {
     val resp = client.performRequest(HttpPost.METHOD_NAME, s"/${indies.mkString(",")}/_refresh")
     resp.getStatusLine.getStatusCode match {
-      case 200 => true
+      case 200 =>
       case code => throw new Exception(s"Refresh topic return code $code")
     }
   }
