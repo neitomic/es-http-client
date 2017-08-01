@@ -2,7 +2,7 @@ organization := "com.github.thanhtien522"
 
 name := "es-http-client"
 
-version := "0.1-SNAPSHOT"
+version := "0.1-beta"
 
 scalaVersion := "2.11.11"
 
@@ -18,13 +18,7 @@ pomIncludeRepository := { _ => false }
 
 licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.html"))
 
-publishArtifact in (Compile, packageBin) := true
-
 publishArtifact in (Test, packageBin) := false
-
-publishArtifact in (Compile, packageDoc) := false
-
-publishArtifact in (Compile, packageSrc) := false
 
 publishMavenStyle := true
 
@@ -44,3 +38,7 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+
+developers := List(
+  Developer(id="thanhtien522", name="Tien Nguyen", email="thanhtien522@gmail.com", url=url("https://github.com/thanhtien522"))
+)
