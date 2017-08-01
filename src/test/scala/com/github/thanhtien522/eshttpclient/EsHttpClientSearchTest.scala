@@ -6,8 +6,7 @@ package com.github.thanhtien522.eshttpclient
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.github.thanhtien522.eshttpclient.entities.SearchRequest
-import org.elasticsearch.client.http.entities.{BasicAuthInfo, NoAuth}
+import com.github.thanhtien522.eshttpclient.entities.{BasicAuthInfo, NoAuth, SearchRequest}
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterAllConfigMap, ConfigMap, FunSuite}
