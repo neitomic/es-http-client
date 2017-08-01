@@ -2,7 +2,7 @@ organization := "com.github.thanhtien522"
 
 name := "es_http_client"
 
-version := "1.0-SNAPSHOT"
+version := "0.1-beta"
 
 scalaVersion := "2.11.11"
 
