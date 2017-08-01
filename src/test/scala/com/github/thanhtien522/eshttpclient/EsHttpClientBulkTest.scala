@@ -1,8 +1,8 @@
-package org.elasticsearch.client.http
+package com.github.thanhtien522.eshttpclient
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.elasticsearch.client.http.entities._
+import com.github.thanhtien522.eshttpclient.entities._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {

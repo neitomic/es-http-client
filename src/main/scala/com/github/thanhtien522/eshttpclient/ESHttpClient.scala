@@ -1,4 +1,4 @@
-package org.elasticsearch.client.http
+package com.github.thanhtien522.eshttpclient
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -10,7 +10,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.nio.entity.{NByteArrayEntity, NStringEntity}
 import org.apache.http.{Consts, HttpHost}
-import org.elasticsearch.client.http.entities._
+import com.github.thanhtien522.eshttpclient.entities._
 import org.elasticsearch.client.{RestClient, RestClientBuilder}
 
 import scala.collection.JavaConversions._

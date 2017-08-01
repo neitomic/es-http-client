@@ -1,15 +1,12 @@
-package org.elasticsearch.client.http.entities
+package com.github.thanhtien522.eshttpclient.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 /**
-  * Created by user on 6/15/17.
+  * @author Tien Nguyen
   */
-class ClusterEntities {
-
-}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[SnakeCaseStrategy])

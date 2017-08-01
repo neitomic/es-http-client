@@ -1,7 +1,7 @@
-package org.elasticsearch.client.http.entities
+package com.github.thanhtien522.eshttpclient.entities
 
 /**
-  * Created by user on 6/8/17.
+  * @author Tien Nguyen
   */
 trait AuthInfo
 

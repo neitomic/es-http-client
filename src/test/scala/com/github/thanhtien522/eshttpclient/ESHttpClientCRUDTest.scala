@@ -1,4 +1,4 @@
-package org.elasticsearch.client.http
+package com.github.thanhtien522.eshttpclient
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
