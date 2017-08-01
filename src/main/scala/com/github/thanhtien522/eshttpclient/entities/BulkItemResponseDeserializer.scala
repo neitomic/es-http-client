@@ -1,14 +1,10 @@
-package org.elasticsearch.client.http.entities
-
-import java.util
+package com.github.thanhtien522.eshttpclient.entities
 
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer, JsonNode}
 
 /**
-  * Created by user on 6/21/17.
+  * @author Tien Nguyen
   */
 class BulkItemResponseDeserializer extends JsonDeserializer[BulkItemResponse] {
 

@@ -1,4 +1,4 @@
-package org.elasticsearch.client.http.entities
+package com.github.thanhtien522.eshttpclient.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
@@ -14,6 +14,13 @@ trait DocRequest {
   def toBulkJson(): String
 }
 
+/**
+  * Index document request
+  * @param __index optional index of request, the index can be specified by API path
+  * @param __type  optional type of request, the type can be specified by API path
+  * @param __id    id of document
+  * @param source  the document source
+  */
 case class DocIndexRequest(__index: Option[String], __type: Option[String], __id: Option[String], source: String) extends DocRequest {
   override def toBulkJson(): String = {
     val meta = {
@@ -28,6 +35,12 @@ case class DocIndexRequest(__index: Option[String], __type: Option[String], __id
   }
 }
 
+/**
+  * Index document request
+  * @param __index optional index of request, the index can be specified by API path
+  * @param __type  optional type of request, the type can be specified by API path
+  * @param __id    id of document
+  */
 case class DocDeleteRequest(__index: Option[String], __type: Option[String], __id: String) extends DocRequest {
   override def toBulkJson(): String = {
     val meta = {
@@ -43,9 +56,9 @@ case class DocDeleteRequest(__index: Option[String], __type: Option[String], __i
 }
 
 /**
-  *
+  * Update document request
   * @param __index optional index of request, the index can be specified by API path
-  * @param __type  optional index of request, the index can be specified by API path
+  * @param __type  optional type of request, the type can be specified by API path
   * @param __id    id of document
   * @param source  the document source
   */
