@@ -2,7 +2,7 @@ organization := "com.github.thanhtien522"
 
 name := "es-http-client"
 
-version := "0.1-beta"
+version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.11.11"
 
@@ -44,5 +44,3 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
-
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
