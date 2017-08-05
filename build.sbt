@@ -8,8 +8,8 @@ scalaVersion := "2.11.11"
 
 libraryDependencies ++= Seq(
   "org.elasticsearch.client" % "rest" % "5.4.1",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.8",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.5",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.6.5",
   "org.elasticsearch" % "elasticsearch" %"2.4.1" % "test",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
