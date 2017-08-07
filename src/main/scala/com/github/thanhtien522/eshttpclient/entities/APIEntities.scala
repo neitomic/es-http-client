@@ -178,7 +178,7 @@ case class DeleteResponse(override val __index: String,
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class BulkResponse(took: Long, items: Seq[BulkItemResponse])
+case class BulkResponse(took: Long, errors: Boolean, items: Seq[BulkItemResponse])
 
 @JsonDeserialize(using = classOf[BulkItemResponseDeserializer])
 case class BulkItemResponse(actionType: String, response: AbstractDocResponse)

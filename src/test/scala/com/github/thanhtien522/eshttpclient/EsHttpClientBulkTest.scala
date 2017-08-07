@@ -123,11 +123,13 @@ class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {
       DocIndexRequest(None, None, None, """{"id":98,"type":"facebook share","user_id":111,"date":"2013-03-15 09:42:04.143488"}""")
     )
 
-    val resp = client.bulk(Some(index), Some("events"), requests).items.toArray
-    assert(resp(0).response.status == 400)
-    assert(resp(1).response.status == 400)
-    assert(resp(2).response.status == 201)
-    assert(resp(3).response.status == 201)
+    val resp = client.bulk(Some(index), Some("events"), requests)
+    val items = resp.items.toArray
+    assert(resp.errors)
+    assert(items(0).response.status == 400)
+    assert(items(1).response.status == 400)
+    assert(items(2).response.status == 201)
+    assert(items(3).response.status == 201)
   }
 
   override def afterAll(): Unit = {
