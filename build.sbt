@@ -2,7 +2,7 @@ organization := "com.github.thanhtien522"
 
 name := "es-http-client"
 
-version := "0.2-SNAPSHOT"
+version := "0.2.1"
 
 scalaVersion := "2.11.11"
 
@@ -38,6 +38,7 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+
 
 developers := List(
   Developer(id="thanhtien522", name="Tien Nguyen", email="thanhtien522@gmail.com", url=url("https://github.com/thanhtien522"))

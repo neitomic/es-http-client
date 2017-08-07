@@ -201,11 +201,11 @@ case class MultiSearchResponse(responses: Seq[SearchResponse])
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class SearchResponse(timeOut: Boolean, took: Long, hits: SearchHits)
+case class SearchResponse(timeOut: Boolean, took: Long, hits: SearchHits, aggregations: Map[String, Any])
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class SearchHits(total: Long, maxScore: Double, hits: Seq[SearchHit], aggregations: Map[String, Any])
+case class SearchHits(total: Long, maxScore: Double, hits: Seq[SearchHit])
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
