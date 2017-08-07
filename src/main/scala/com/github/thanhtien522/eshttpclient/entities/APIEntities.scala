@@ -98,8 +98,7 @@ case class SearchRequest(searchQuery: String, __index: Option[String] = None, __
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class GetRequest(__index: Option[String], __type: Option[String], __id: String)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
+@JsonDeserialize(using = classOf[ErrorDeserializer])
 case class Error(`type`: String, reason: String, causedBy: Error)
 
 @JsonIgnoreProperties(ignoreUnknown = true)

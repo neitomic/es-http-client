@@ -19,3 +19,20 @@ class BulkItemResponseDeserializer extends JsonDeserializer[BulkItemResponse] {
     }
   }
 }
+
+class ErrorDeserializer extends JsonDeserializer[Error] {
+  override def deserialize(p: JsonParser, ctxt: DeserializationContext): Error = {
+    val node = p.getCodec.readTree[JsonNode](p)
+
+    if (node.isTextual) {
+      Error("exception", node.asText(), null)
+    } else if (node.isObject) {
+      val `type` = node.get("type").asText()
+      val reason = node.get("reason").asText()
+      val caused = if (node.has("caused_by")) p.getCodec.treeToValue(node.get("caused_by"), classOf[Error]) else null
+      Error(`type`, reason, caused)
+    } else {
+      throw new Exception(s"Deserialize Error failure. Expected STRING or OBJECT, actual ${node.getNodeType.toString}")
+    }
+  }
+}
