@@ -12,6 +12,7 @@ class BulkItemResponseDeserializer extends JsonDeserializer[BulkItemResponse] {
     val node = p.getCodec.readTree[JsonNode](p)
     node.fieldNames().next() match {
       case "index" => BulkItemResponse("index", p.getCodec.treeToValue(node.get("index"), classOf[IndexResponse]))
+      case "create" => BulkItemResponse("create", p.getCodec.treeToValue(node.get("create"), classOf[IndexResponse]))
       case "update" => BulkItemResponse("update", p.getCodec.treeToValue(node.get("update"), classOf[UpdateResponse]))
       case "delete" => BulkItemResponse("delete", p.getCodec.treeToValue(node.get("delete"), classOf[DeleteResponse]))
       case s => throw new Exception("Deserialize BulkItemResponse failure. Unhandled action name `" + s + "`")

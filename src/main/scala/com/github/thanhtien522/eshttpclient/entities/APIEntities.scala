@@ -16,6 +16,7 @@ trait DocRequest {
 
 /**
   * Index document request
+  *
   * @param __index optional index of request, the index can be specified by API path
   * @param __type  optional type of request, the type can be specified by API path
   * @param __id    id of document
@@ -37,6 +38,7 @@ case class DocIndexRequest(__index: Option[String], __type: Option[String], __id
 
 /**
   * Index document request
+  *
   * @param __index optional index of request, the index can be specified by API path
   * @param __type  optional type of request, the type can be specified by API path
   * @param __id    id of document
@@ -57,6 +59,7 @@ case class DocDeleteRequest(__index: Option[String], __type: Option[String], __i
 
 /**
   * Update document request
+  *
   * @param __index optional index of request, the index can be specified by API path
   * @param __type  optional type of request, the type can be specified by API path
   * @param __id    id of document
@@ -95,12 +98,34 @@ case class SearchRequest(searchQuery: String, __index: Option[String] = None, __
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class GetRequest(__index: Option[String], __type: Option[String], __id: String)
 
-
-trait DocResponse
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
+case class Error(`type`: String, reason: String, causedBy: Error)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class IndexResponse(__index: String, __type: String, __id: String, __version: Long, created: Boolean) extends DocResponse {
+abstract class BaseResponse(val status: Int, val error: Error)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
+abstract class AbstractDocResponse(val __index: String,
+                                   val __type: String,
+                                   val __id: String,
+                                   val __version: Long,
+                                   override val status: Int,
+                                   override val error: Error
+                                  ) extends BaseResponse(status, error)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
+case class IndexResponse(override val __index: String,
+                         override val __type: String,
+                         override val __id: String,
+                         override val __version: Long,
+                         created: Boolean,
+                         override val status: Int,
+                         override val error: Error
+                        ) extends AbstractDocResponse(__index, __type, __id, __version, status, error) {
   def getIndex: String = __index
 
   def getType: String = __type
@@ -114,7 +139,13 @@ case class IndexResponse(__index: String, __type: String, __id: String, __versio
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class UpdateResponse(__index: String, __type: String, __id: String, __version: Long) extends DocResponse {
+case class UpdateResponse(override val __index: String,
+                          override val __type: String,
+                          override val __id: String,
+                          override val __version: Long,
+                          override val status: Int,
+                          override val error: Error
+                         ) extends AbstractDocResponse(__index, __type, __id, __version, status, error) {
   def getIndex: String = __index
 
   def getType: String = __type
@@ -126,7 +157,14 @@ case class UpdateResponse(__index: String, __type: String, __id: String, __versi
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
-case class DeleteResponse(__index: String, __type: String, __id: String, __version: Long, found: Boolean) extends DocResponse {
+case class DeleteResponse(override val __index: String,
+                          override val __type: String,
+                          override val __id: String,
+                          override val __version: Long,
+                          found: Boolean,
+                          override val status: Int,
+                          override val error: Error
+                         ) extends AbstractDocResponse(__index, __type, __id, __version, status, error) {
   def getIndex: String = __index
 
   def getType: String = __type
@@ -143,7 +181,7 @@ case class DeleteResponse(__index: String, __type: String, __id: String, __versi
 case class BulkResponse(took: Long, items: Seq[BulkItemResponse])
 
 @JsonDeserialize(using = classOf[BulkItemResponseDeserializer])
-case class BulkItemResponse(actionType: String, response: DocResponse)
+case class BulkItemResponse(actionType: String, response: AbstractDocResponse)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])

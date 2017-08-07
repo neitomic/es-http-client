@@ -13,13 +13,52 @@ class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {
 
   val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
+  val mapping =
+    """
+      |{
+      |  "mappings": {
+      |    "events": {
+      |      "properties": {
+      |        "id": {
+      |					"type": "integer"
+      |				},
+      |				"type": {
+      |					"type": "string",
+      |					"index": "not_analyzed"
+      |				},
+      |				"user_id": {
+      |					"type": "integer"
+      |				},
+      |        "date": {
+      |          "type": "date",
+      |          "format": "yyyy-MM-dd hh:mm:ss.SSSSSS"
+      |        }
+      |      }
+      |    },
+      |    "tweet": {
+      |      "properties": {
+      |        "user": {
+      |          "type": "string"
+      |        },
+      |        "post_date": {
+      |          "type": "date"
+      |        },
+      |        "message": {
+      |          "type": "string"
+      |        }
+      |      }
+      |    }
+      |  }
+      |}
+    """.stripMargin
+
   override def beforeAll(): Unit = {
     val auth = (Option(System.getProperty("auth.user")), Option(System.getProperty("auth.pass"))) match {
       case (Some(user), Some(pass)) => BasicAuthInfo(user, pass)
       case _ => NoAuth()
     }
     client = new ESHttpClient(System.getProperty("servers", "localhost:9200").split(","), auth)
-    assert(client.createIndex(index, "{}").acknowledged)
+    assert(client.createIndex(index, mapping).acknowledged)
   }
 
   val doc = Map(
@@ -46,7 +85,7 @@ class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {
     )
     val resp = client.bulk(Some(index), Some("tweet"), requests)
     assert(resp.items.length == requests.length)
-    assert(resp.items.head.actionType =="index")
+    assert(resp.items.head.actionType == "index")
     assert(resp.items.head.response.isInstanceOf[IndexResponse])
     val indexResp = resp.items.head.response.asInstanceOf[IndexResponse]
     assert(indexResp.getIndex == index)
@@ -56,7 +95,7 @@ class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {
     //assert(indexResp.created)
     assert(indexResp.getVersion == 1)
 
-    assert(resp.items.last.actionType =="update")
+    assert(resp.items.last.actionType == "update")
     assert(resp.items.last.response.isInstanceOf[UpdateResponse])
     val updateResp = resp.items.last.response.asInstanceOf[UpdateResponse]
     assert(updateResp.getIndex == index)
@@ -73,6 +112,22 @@ class EsHttpClientBulkTest extends FunSuite with BeforeAndAfterAll {
     assert(getResp.getVersion == 2)
     assert(getResp.getSource == updatedDoc)
 
+  }
+
+  test("bulk with some failure requests") {
+
+    val requests = Seq(
+      DocIndexRequest(None, None, None, """{"id":91,"type":"like","user_id":132,"date":"2013-03-14 14:41:14.286371"}"""),
+      DocIndexRequest(None, None, None, """{"id":92,"type":"like","user_id":116,"date":"2013-03-14 17:50:36.205411"}"""),
+      DocIndexRequest(None, None, None, """{"id":97,"type":"twitter share","user_id":22,"date":"2013-03-15 08:04:44.797078"}"""),
+      DocIndexRequest(None, None, None, """{"id":98,"type":"facebook share","user_id":111,"date":"2013-03-15 09:42:04.143488"}""")
+    )
+
+    val resp = client.bulk(Some(index), Some("events"), requests).items.toArray
+    assert(resp(0).response.status == 400)
+    assert(resp(1).response.status == 400)
+    assert(resp(2).response.status == 201)
+    assert(resp(3).response.status == 201)
   }
 
   override def afterAll(): Unit = {
