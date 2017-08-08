@@ -1,6 +1,6 @@
 package com.github.thanhtien522.eshttpclient
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{ObjectMapper, PropertyNamingStrategy}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.thanhtien522.eshttpclient.entities.SearchResponse
 import org.scalatest.FunSuite
@@ -75,7 +75,8 @@ class ApiEntitiesTest extends FunSuite {
       |}
     """.stripMargin
 
-  val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
+  private val objectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
+    .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
 
   test("Deserialize SearchResponse from String should return success value") {
 
