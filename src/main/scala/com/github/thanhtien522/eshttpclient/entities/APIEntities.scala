@@ -1,8 +1,7 @@
 package com.github.thanhtien522.eshttpclient.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy
-import com.fasterxml.jackson.databind.annotation.{JsonDeserialize, JsonNaming}
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 trait DocRequest {
 
@@ -95,18 +94,15 @@ case class SearchRequest(searchQuery: String, __index: Option[String] = None, __
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class GetRequest(__index: Option[String], __type: Option[String], __id: String)
 
 @JsonDeserialize(using = classOf[ErrorDeserializer])
 case class Error(`type`: String, reason: String, causedBy: Error)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 abstract class BaseResponse(val status: Int, val error: Error)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 abstract class AbstractDocResponse(val __index: String,
                                    val __type: String,
                                    val __id: String,
@@ -116,7 +112,6 @@ abstract class AbstractDocResponse(val __index: String,
                                   ) extends BaseResponse(status, error)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class IndexResponse(override val __index: String,
                          override val __type: String,
                          override val __id: String,
@@ -137,7 +132,6 @@ case class IndexResponse(override val __index: String,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class UpdateResponse(override val __index: String,
                           override val __type: String,
                           override val __id: String,
@@ -155,7 +149,6 @@ case class UpdateResponse(override val __index: String,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class DeleteResponse(override val __index: String,
                           override val __type: String,
                           override val __id: String,
@@ -176,14 +169,12 @@ case class DeleteResponse(override val __index: String,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class BulkResponse(took: Long, errors: Boolean, items: Seq[BulkItemResponse])
 
 @JsonDeserialize(using = classOf[BulkItemResponseDeserializer])
 case class BulkItemResponse(actionType: String, response: AbstractDocResponse)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class GetResponse(__index: String, __type: String, __id: String, __version: Long, found: Boolean, __source: Map[String, Any]) {
   def getIndex: String = __index
 
@@ -199,16 +190,13 @@ case class GetResponse(__index: String, __type: String, __id: String, __version:
 
 case class MultiSearchResponse(responses: Seq[SearchResponse])
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
+@JsonIgnoreProperties (ignoreUnknown = true)
 case class SearchResponse(timeOut: Boolean, took: Long, hits: SearchHits, aggregations: Map[String, Any])
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class SearchHits(total: Long, maxScore: Double, hits: Seq[SearchHit])
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class SearchHit(__index: String, __type: String, __id: String, __score: Double, __source: Map[String, Any]) {
   def getIndex: String = __index
 
@@ -222,5 +210,4 @@ case class SearchHit(__index: String, __type: String, __id: String, __score: Dou
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class AckResponse(acknowledged: Boolean)

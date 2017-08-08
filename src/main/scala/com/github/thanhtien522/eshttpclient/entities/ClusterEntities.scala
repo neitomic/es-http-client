@@ -9,9 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
   */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class ClusterInfo(clusterName: String, version: VersionInfo)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(classOf[LowerCaseWithUnderscoresStrategy])
 case class VersionInfo(number: String, luceneVersion: String)

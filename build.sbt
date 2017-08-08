@@ -2,14 +2,14 @@ organization := "com.github.thanhtien522"
 
 name := "es-http-client"
 
-version := "0.2.1"
+version := "0.2.1_jackson-2.8"
 
 scalaVersion := "2.11.11"
 
 libraryDependencies ++= Seq(
   "org.elasticsearch.client" % "rest" % "5.4.1",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.5",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.6.5",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.4",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.4",
   "org.elasticsearch" % "elasticsearch" %"2.4.1" % "test",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
@@ -38,7 +38,6 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
-
 
 developers := List(
   Developer(id="thanhtien522", name="Tien Nguyen", email="thanhtien522@gmail.com", url=url("https://github.com/thanhtien522"))

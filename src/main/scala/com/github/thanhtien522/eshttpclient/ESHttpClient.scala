@@ -1,6 +1,7 @@
 package com.github.thanhtien522.eshttpclient
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{ObjectMapper, PropertyNamingStrategy}
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.commons.logging.LogFactory
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
@@ -24,7 +25,9 @@ class ESHttpClient(servers: Seq[String], authInfo: AuthInfo) {
 
   private final val APPLICATION_X_NDJSON = ContentType.create("application/x-ndjson", Consts.UTF_8)
 
-  private val objectMapper: ObjectMapper = new ObjectMapper().registerModule(DefaultScalaModule)
+  private val objectMapper: ObjectMapper = new ObjectMapper()
+    .registerModule(DefaultScalaModule)
+    .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
 
   private val client = {
     val builder = RestClient.builder(servers.map(HttpHost.create): _*)
